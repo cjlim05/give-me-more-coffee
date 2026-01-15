@@ -4,15 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(
-    name = "product_option",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_product_option",
-            columnNames = {"product_id", "option_value"}
-        )
-    }
-)
+@Table(name = "product_option")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
