@@ -44,15 +44,6 @@ export default function CoffeeDetail() {
       });
   }, [productId]);
 
-  const getSessionId = async () => {
-    let sessionId = await AsyncStorage.getItem('sessionId');
-    if (!sessionId) {
-      sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      await AsyncStorage.setItem('sessionId', sessionId);
-    }
-    return sessionId;
-  };
-
   const calculateTotalPrice = () => {
     if (!product || !selectedOption) return 0;
     return (product.basePrice + selectedOption.extraPrice) * quantity;
@@ -64,19 +55,34 @@ export default function CoffeeDetail() {
       return;
     }
 
-    const sessionId = await getSessionId();
+    const token = await AsyncStorage.getItem('accessToken');
+
+    if (!token) {
+      Alert.alert('로그인 필요', '장바구니를 이용하려면 로그인이 필요합니다.', [
+        { text: '취소', style: 'cancel' },
+        { text: '로그인', onPress: () => router.push('/login') },
+      ]);
+      return;
+    }
 
     fetch('http://localhost:8080/api/cart', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
       body: JSON.stringify({
-        sessionId,
         productId: product.productId,
         optionId: selectedOption.optionId,
         quantity,
       }),
     })
-      .then(res => res.json())
+      .then(res => {
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('인증 만료');
+        }
+        return res.json();
+      })
       .then(() => {
         Alert.alert('장바구니', '장바구니에 담았습니다.', [
           { text: '계속 쇼핑', style: 'cancel' },
@@ -85,7 +91,13 @@ export default function CoffeeDetail() {
       })
       .catch(err => {
         console.error(err);
-        Alert.alert('오류', '장바구니 담기에 실패했습니다.');
+        if (err.message === '인증 만료') {
+          Alert.alert('로그인 필요', '다시 로그인해주세요.', [
+            { text: '확인', onPress: () => router.push('/login') },
+          ]);
+        } else {
+          Alert.alert('오류', '장바구니 담기에 실패했습니다.');
+        }
       });
   };
 
@@ -95,25 +107,46 @@ export default function CoffeeDetail() {
       return;
     }
 
-    const sessionId = await getSessionId();
+    const token = await AsyncStorage.getItem('accessToken');
+
+    if (!token) {
+      Alert.alert('로그인 필요', '구매하려면 로그인이 필요합니다.', [
+        { text: '취소', style: 'cancel' },
+        { text: '로그인', onPress: () => router.push('/login') },
+      ]);
+      return;
+    }
 
     fetch('http://localhost:8080/api/cart', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
       body: JSON.stringify({
-        sessionId,
         productId: product.productId,
         optionId: selectedOption.optionId,
         quantity,
       }),
     })
-      .then(res => res.json())
+      .then(res => {
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('인증 만료');
+        }
+        return res.json();
+      })
       .then(() => {
         router.push('/cart');
       })
       .catch(err => {
         console.error(err);
-        Alert.alert('오류', '처리에 실패했습니다.');
+        if (err.message === '인증 만료') {
+          Alert.alert('로그인 필요', '다시 로그인해주세요.', [
+            { text: '확인', onPress: () => router.push('/login') },
+          ]);
+        } else {
+          Alert.alert('오류', '처리에 실패했습니다.');
+        }
       });
   };
 

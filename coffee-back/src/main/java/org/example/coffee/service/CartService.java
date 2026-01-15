@@ -11,9 +11,11 @@ import org.example.coffee.dto.CartRequest;
 import org.example.coffee.entity.CartItem;
 import org.example.coffee.entity.Product;
 import org.example.coffee.entity.ProductOption;
+import org.example.coffee.entity.User;
 import org.example.coffee.repository.CartItemRepository;
 import org.example.coffee.repository.ProductRepository;
 import org.example.coffee.repository.ProductOptionRepository;
+import org.example.coffee.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,9 +26,10 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
+    private final UserRepository userRepository;
 
-    public List<CartItemResponse> getCartItems(String sessionId) {
-        List<CartItem> items = cartItemRepository.findBySessionId(sessionId);
+    public List<CartItemResponse> getCartItems(Long userId) {
+        List<CartItem> items = cartItemRepository.findByUser_UserId(userId);
 
         return items.stream()
                 .map(this::toResponse)
@@ -34,7 +37,10 @@ public class CartService {
     }
 
     @Transactional
-    public CartItemResponse addToCart(CartRequest request) {
+    public CartItemResponse addToCart(Long userId, CartRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자가 존재하지 않습니다."));
+
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("상품이 존재하지 않습니다."));
 
@@ -42,15 +48,15 @@ public class CartService {
                 .orElseThrow(() -> new RuntimeException("옵션이 존재하지 않습니다."));
 
         CartItem cartItem = cartItemRepository
-                .findBySessionIdAndProduct_ProductIdAndOption_OptionId(
-                        request.getSessionId(), request.getProductId(), request.getOptionId())
+                .findByUser_UserIdAndProduct_ProductIdAndOption_OptionId(
+                        userId, request.getProductId(), request.getOptionId())
                 .orElse(null);
 
         if (cartItem != null) {
             cartItem.addQuantity(request.getQuantity());
         } else {
             cartItem = CartItem.builder()
-                    .sessionId(request.getSessionId())
+                    .user(user)
                     .product(product)
                     .option(option)
                     .quantity(request.getQuantity())
@@ -80,8 +86,8 @@ public class CartService {
     }
 
     @Transactional
-    public void clearCart(String sessionId) {
-        cartItemRepository.deleteBySessionId(sessionId);
+    public void clearCart(Long userId) {
+        cartItemRepository.deleteByUser_UserId(userId);
     }
 
     private CartItemResponse toResponse(CartItem item) {
