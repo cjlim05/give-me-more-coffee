@@ -20,9 +20,4 @@
 - **Backend:** Spring Boot 3.2, Java 17, JPA, MySQL
 - **Frontend:** React Native (Expo), TypeScript
 
-## 🚀 실행 방법
 
-**Backend**
-```bash
-cd coffee-back
-./mvnw spring-boot:run
