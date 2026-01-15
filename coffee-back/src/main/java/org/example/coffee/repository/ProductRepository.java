@@ -13,4 +13,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 베스트 셀렉션 (category_id = 1 가정)
     List<Product> findTop10ByCategoryId(Long categoryId);
+
+    // 원산지별 필터링
+    List<Product> findByNationality(String nationality);
+
+    // 가공방식별 필터링
+    List<Product> findByType(String type);
 }
