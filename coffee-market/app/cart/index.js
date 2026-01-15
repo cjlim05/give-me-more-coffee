@@ -19,28 +19,41 @@ export default function CartScreen() {
 
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const getSessionId = async () => {
-    let sessionId = await AsyncStorage.getItem('sessionId');
-    if (!sessionId) {
-      sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      await AsyncStorage.setItem('sessionId', sessionId);
-    }
-    return sessionId;
-  };
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const fetchCart = async () => {
     setLoading(true);
-    const sessionId = await getSessionId();
+    const token = await AsyncStorage.getItem('accessToken');
 
-    fetch(`http://localhost:8080/api/cart?sessionId=${sessionId}`)
-      .then(res => res.json())
+    if (!token) {
+      setIsLoggedIn(false);
+      setLoading(false);
+      return;
+    }
+
+    setIsLoggedIn(true);
+
+    fetch('http://localhost:8080/api/cart', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then(res => {
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('인증 만료');
+        }
+        return res.json();
+      })
       .then(data => {
         setCartItems(data);
         setLoading(false);
       })
       .catch(err => {
         console.error(err);
+        if (err.message === '인증 만료') {
+          setIsLoggedIn(false);
+          AsyncStorage.removeItem('accessToken');
+        }
         setLoading(false);
       });
   };
@@ -57,8 +70,13 @@ export default function CartScreen() {
       return;
     }
 
+    const token = await AsyncStorage.getItem('accessToken');
+
     fetch(`http://localhost:8080/api/cart/${cartItemId}?quantity=${newQuantity}`, {
       method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
     })
       .then(() => {
         setCartItems(prev =>
@@ -85,9 +103,14 @@ export default function CartScreen() {
         {
           text: '삭제',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
+            const token = await AsyncStorage.getItem('accessToken');
+
             fetch(`http://localhost:8080/api/cart/${cartItemId}`, {
               method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
             })
               .then(() => {
                 setCartItems(prev => prev.filter(item => item.cartItemId !== cartItemId));
@@ -169,6 +192,30 @@ export default function CartScreen() {
       </View>
     </View>
   );
+
+  // 로그인 안 된 경우
+  if (!loading && !isLoggedIn) {
+    return (
+      <View style={styles.container}>
+        <Header />
+        <View style={styles.content}>
+          <Text style={styles.pageTitle}>장바구니</Text>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>🔐</Text>
+            <Text style={styles.emptyTitle}>로그인이 필요합니다</Text>
+            <Text style={styles.emptyDesc}>장바구니를 이용하려면 로그인해주세요</Text>
+            <TouchableOpacity
+              style={styles.shopBtn}
+              onPress={() => router.push('/login')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.shopBtnText}>로그인하기</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -259,7 +306,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // 빈 장바구니
+  // 빈 장바구니 / 로그인 필요
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
