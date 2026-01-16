@@ -174,15 +174,23 @@ export default function Header() {
                 Object.entries(NATIONALITIES_BY_CONTINENT).map(
                   ([continent, countries]) => (
                     <View key={continent}>
-                      <TouchableOpacity
-                        onPress={() =>
-                          setOpenContinent(openContinent === continent ? null : continent)
-                        }
-                      >
-                        <Text style={styles.continent}>
-                          {continent} {openContinent === continent ? '-' : '+'}
-                        </Text>
-                      </TouchableOpacity>
+                      <View style={styles.continentRow}>
+                        <TouchableOpacity
+                          style={styles.continentName}
+                          onPress={() => goCategory({ continent })}
+                        >
+                          <Text style={styles.continentText}>{continent}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() =>
+                            setOpenContinent(openContinent === continent ? null : continent)
+                          }
+                        >
+                          <Text style={styles.expandBtn}>
+                            {openContinent === continent ? '−' : '+'}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
 
                       {openContinent === continent &&
                         countries.map((country) => (
@@ -290,7 +298,16 @@ const styles = StyleSheet.create({
   subMenu: { paddingLeft: 12, paddingBottom: 8 },
   subTitle: { fontWeight: '600', marginVertical: 6 },
 
-  continent: { marginLeft: 8, marginVertical: 4, fontWeight: '500' },
+  continentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginLeft: 8,
+    marginVertical: 4,
+  },
+  continentName: { flex: 1 },
+  continentText: { fontWeight: '500' },
+  expandBtn: { paddingHorizontal: 12, fontSize: 16 },
   country: { marginLeft: 20, paddingVertical: 4 },
 
   closeBtn: {

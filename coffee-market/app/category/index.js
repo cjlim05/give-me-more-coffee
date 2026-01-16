@@ -17,18 +17,20 @@ const CARD_WIDTH = (width - 52) / 2;
 
 export default function CategoryScreen() {
   const router = useRouter();
-  const { nationality, process } = useLocalSearchParams();
+  const { continent, nationality, process } = useLocalSearchParams();
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const title = nationality || process || '카테고리';
+  const title = continent || nationality || process || '카테고리';
 
   useEffect(() => {
     setLoading(true);
 
     let url = '';
-    if (nationality) {
+    if (continent) {
+      url = `http://localhost:8080/api/products/filter/continent?value=${encodeURIComponent(continent)}`;
+    } else if (nationality) {
       url = `http://localhost:8080/api/products/filter/nationality?value=${encodeURIComponent(nationality)}`;
     } else if (process) {
       url = `http://localhost:8080/api/products/filter/type?value=${encodeURIComponent(process)}`;
@@ -48,7 +50,7 @@ export default function CategoryScreen() {
     } else {
       setLoading(false);
     }
-  }, [nationality, process]);
+  }, [continent, nationality, process]);
 
   const renderProduct = ({ item }) => (
     <TouchableOpacity
