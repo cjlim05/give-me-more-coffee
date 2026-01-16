@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.example.coffee.dto.ProductDetailResponse;
-import org.example.coffee.entity.Product;
+import org.example.coffee.dto.ProductListResponse;
 import org.example.coffee.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
@@ -25,13 +25,13 @@ public class ProductController {
 
     // 최근 입고
     @GetMapping("/latest")
-    public List<Product> getLatest() {
+    public List<ProductListResponse> getLatest() {
         return productService.getLatestProducts();
     }
 
     // 베스트 셀렉션
     @GetMapping("/best")
-    public List<Product> getBest() {
+    public List<ProductListResponse> getBest() {
         return productService.getBestProducts();
     }
 
@@ -43,19 +43,19 @@ public class ProductController {
 
     // 원산지별 필터
     @GetMapping("/filter/nationality")
-    public List<Product> getByNationality(@RequestParam String value) {
+    public List<ProductListResponse> getByNationality(@RequestParam String value) {
         return productService.getProductsByNationality(value);
     }
 
     // 가공방식별 필터
     @GetMapping("/filter/type")
-    public List<Product> getByType(@RequestParam String value) {
+    public List<ProductListResponse> getByType(@RequestParam String value) {
         return productService.getProductsByType(value);
     }
 
     // 대륙별 필터
     @GetMapping("/filter/continent")
-    public List<Product> getByContinent(@RequestParam String value) {
+    public List<ProductListResponse> getByContinent(@RequestParam String value) {
         return productService.getProductsByContinent(value);
     }
 }
