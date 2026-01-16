@@ -12,6 +12,7 @@ public class ProductDetailResponse {
     private Long productId;
     private String productName;
     private int basePrice;
+    private String continent;
     private String nationality;
     private String type;
     private String thumbnailImg;

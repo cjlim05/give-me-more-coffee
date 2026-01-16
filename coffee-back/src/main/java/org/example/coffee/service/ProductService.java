@@ -28,7 +28,7 @@ public class ProductService {
     }
 
     public List<Product> getBestProducts() {
-        return productRepository.findTop10ByCategoryId(1L);
+        return productRepository.findTop10ByOrderByProductIdAsc();
     }
 
     public Product getProductDetail(Long productId) {
@@ -63,6 +63,7 @@ public class ProductService {
                 .productId(product.getProductId())
                 .productName(product.getProductName())
                 .basePrice(product.getBasePrice())
+                .continent(product.getContinent())
                 .nationality(product.getNationality())
                 .type(product.getType())
                 .thumbnailImg(product.getThumbnailImg())
@@ -78,5 +79,9 @@ public class ProductService {
 
     public List<Product> getProductsByType(String type) {
         return productRepository.findByType(type);
+    }
+
+    public List<Product> getProductsByContinent(String continent) {
+        return productRepository.findByContinent(continent);
     }
 }

@@ -19,11 +19,14 @@ public class Product {
     @Column(name = "base_price", nullable = false)
     private int basePrice;
 
-    @Column(length = 100)
-    private String nationality;   // DB: varchar(100)
+    @Column(length = 50)
+    private String continent;     // 대륙: 아프리카, 중남미, 아시아
 
     @Column(length = 100)
-    private String type;          // DB: varchar(100)
+    private String nationality;   // 나라: 에티오피아, 케냐...
+
+    @Column(length = 100)
+    private String type;          // 가공방식: 워시드, 내추럴...
 
     @Column(name = "thumbnail_img", length = 250)
     private String thumbnailImg;

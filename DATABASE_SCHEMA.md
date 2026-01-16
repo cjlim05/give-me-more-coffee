@@ -203,12 +203,14 @@
 | product_id | BIGINT | PK | 상품 ID |
 | product_name | VARCHAR(200) | NO | 상품명 |
 | base_price | INT | NO | 기본 가격 |
+| continent | VARCHAR(50) | YES | 대륙 (아프리카, 중남미, 아시아) |
 | nationality | VARCHAR(100) | YES | 원산지 |
 | type | VARCHAR(100) | YES | 가공방식 |
 | thumbnail_img | VARCHAR(250) | YES | 썸네일 |
 | detail_img | VARCHAR(250) | YES | 상세 이미지 |
 
 **필터링**
+- `continent`: 대륙별 필터 (아프리카, 중남미, 아시아)
 - `nationality`: 원산지별 필터 (프론트엔드 하드코딩)
 - `type`: 가공방식별 필터 (프론트엔드 하드코딩)
 
