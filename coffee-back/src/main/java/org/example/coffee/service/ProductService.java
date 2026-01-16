@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import org.example.coffee.dto.ProductDetailResponse;
+import org.example.coffee.dto.ProductListResponse;
 import org.example.coffee.entity.Product;
 import org.example.coffee.entity.ProductImage;
 import org.example.coffee.entity.ProductOption;
@@ -23,17 +24,30 @@ public class ProductService {
     private final ProductOptionRepository productOptionRepository;
     private final ProductImageRepository productImageRepository;
 
-    public List<Product> getLatestProducts() {
-        return productRepository.findTop10ByOrderByProductIdDesc();
+    public List<ProductListResponse> getLatestProducts() {
+        return productRepository.findTop10ByOrderByProductIdDesc()
+                .stream()
+                .map(this::toListResponse)
+                .collect(Collectors.toList());
     }
 
-    public List<Product> getBestProducts() {
-        return productRepository.findTop10ByOrderByProductIdAsc();
+    public List<ProductListResponse> getBestProducts() {
+        return productRepository.findTop10ByOrderByProductIdAsc()
+                .stream()
+                .map(this::toListResponse)
+                .collect(Collectors.toList());
     }
 
-    public Product getProductDetail(Long productId) {
-        return productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("상품이 존재하지 않습니다."));
+    private ProductListResponse toListResponse(Product product) {
+        return ProductListResponse.builder()
+                .productId(product.getProductId())
+                .productName(product.getProductName())
+                .basePrice(product.getBasePrice())
+                .continent(product.getContinent())
+                .nationality(product.getNationality())
+                .type(product.getType())
+                .thumbnailImg(product.getThumbnailImg())
+                .build();
     }
 
     public ProductDetailResponse getProductDetailWithOptions(Long productId) {
@@ -73,15 +87,24 @@ public class ProductService {
                 .build();
     }
 
-    public List<Product> getProductsByNationality(String nationality) {
-        return productRepository.findByNationality(nationality);
+    public List<ProductListResponse> getProductsByNationality(String nationality) {
+        return productRepository.findByNationality(nationality)
+                .stream()
+                .map(this::toListResponse)
+                .collect(Collectors.toList());
     }
 
-    public List<Product> getProductsByType(String type) {
-        return productRepository.findByType(type);
+    public List<ProductListResponse> getProductsByType(String type) {
+        return productRepository.findByType(type)
+                .stream()
+                .map(this::toListResponse)
+                .collect(Collectors.toList());
     }
 
-    public List<Product> getProductsByContinent(String continent) {
-        return productRepository.findByContinent(continent);
+    public List<ProductListResponse> getProductsByContinent(String continent) {
+        return productRepository.findByContinent(continent)
+                .stream()
+                .map(this::toListResponse)
+                .collect(Collectors.toList());
     }
 }
