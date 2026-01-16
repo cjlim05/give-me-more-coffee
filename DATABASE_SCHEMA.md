@@ -14,13 +14,13 @@
    ┌────┼────┐                    ┌────────┼────────┐
    ▼    ▼    ▼                    ▼        ▼        ▼
 ┌────┐┌────┐┌─────┐         ┌────────┐┌────────┐┌────────┐
-│addr││pnt ││order│         │ option ││ image  ││category│
+│addr││pnt ││order│         │ option ││ image  ││ variant│
 └────┘└────┘└──┬──┘         └───┬────┘└────────┘└────────┘
                │                │
-               ▼                ▼
-          ┌─────────┐     ┌─────────┐
-          │order_itm│     │ variant │
-          └─────────┘     └─────────┘
+               ▼                │
+          ┌─────────┐           │
+          │order_itm│           │
+          └─────────┘           │
 
 
 ┌─────────────────────────────────────────────────────────┐
@@ -47,7 +47,6 @@
 | | product_option | 옵션 |
 | | product_image | 이미지 |
 | | product_variant | 재고 |
-| | category | 카테고리 |
 | **연결** | cart_item | 장바구니 (user ↔ product) |
 | | order_item | 주문상품 (order ↔ product) |
 | | review | 리뷰 (user ↔ product) |
@@ -70,7 +69,6 @@
 | product | product_image | 1:N | 상품 사진들 |
 | product | product_variant | 1:N | 재고 |
 | product | review | 1:N | 상품 리뷰 |
-| category | product | 1:N | 카테고리별 상품 |
 
 ---
 
@@ -199,15 +197,7 @@
 
 ---
 
-### 9. category (카테고리)
-| 컬럼 | 타입 | NULL | 설명 |
-|------|------|------|------|
-| category_id | BIGINT | PK | 카테고리 ID |
-| category_name | VARCHAR(100) | YES | 카테고리명 |
-
----
-
-### 10. product (상품)
+### 9. product (상품)
 | 컬럼 | 타입 | NULL | 설명 |
 |------|------|------|------|
 | product_id | BIGINT | PK | 상품 ID |
@@ -215,13 +205,16 @@
 | base_price | INT | NO | 기본 가격 |
 | nationality | VARCHAR(100) | YES | 원산지 |
 | type | VARCHAR(100) | YES | 가공방식 |
-| category_id | BIGINT | FK | 카테고리 |
 | thumbnail_img | VARCHAR(250) | YES | 썸네일 |
 | detail_img | VARCHAR(250) | YES | 상세 이미지 |
 
+**필터링**
+- `nationality`: 원산지별 필터 (프론트엔드 하드코딩)
+- `type`: 가공방식별 필터 (프론트엔드 하드코딩)
+
 ---
 
-### 11. product_option (상품 옵션)
+### 10. product_option (상품 옵션)
 | 컬럼 | 타입 | NULL | 설명 |
 |------|------|------|------|
 | option_id | BIGINT | PK | 옵션 ID |
@@ -231,7 +224,7 @@
 
 ---
 
-### 12. product_variant (재고)
+### 11. product_variant (재고)
 | 컬럼 | 타입 | NULL | 설명 |
 |------|------|------|------|
 | variant_id | BIGINT | PK | 변형 ID |
@@ -241,7 +234,7 @@
 
 ---
 
-### 13. product_image (상품 이미지)
+### 12. product_image (상품 이미지)
 | 컬럼 | 타입 | NULL | 설명 |
 |------|------|------|------|
 | image_id | BIGINT | PK | 이미지 ID |
