@@ -25,9 +25,6 @@ public class Product {
     @Column(length = 100)
     private String type;          // DB: varchar(100)
 
-    @Column(name = "category_id")
-    private Long categoryId;
-
     @Column(name = "thumbnail_img", length = 250)
     private String thumbnailImg;
 

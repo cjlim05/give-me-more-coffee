@@ -34,8 +34,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/refresh",
-                                "/api/products/**",
-                                "/api/categories/**"
+                                "/api/products/**"
                         ).permitAll()
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
