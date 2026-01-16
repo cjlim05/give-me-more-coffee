@@ -52,4 +52,10 @@ public class ProductController {
     public List<Product> getByType(@RequestParam String value) {
         return productService.getProductsByType(value);
     }
+
+    // 대륙별 필터
+    @GetMapping("/filter/continent")
+    public List<Product> getByContinent(@RequestParam String value) {
+        return productService.getProductsByContinent(value);
+    }
 }
