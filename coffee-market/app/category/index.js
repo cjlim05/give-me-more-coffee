@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -77,8 +77,13 @@ export default function CategoryScreen() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerTitle: '',
+          headerBackTitle: '뒤로가기',
+        }}
+      />
       <Header />
-
       <View style={styles.content}>
         <View style={styles.titleRow}>
           <Text style={styles.pageTitle}>{title}</Text>
