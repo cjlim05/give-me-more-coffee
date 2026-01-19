@@ -207,7 +207,6 @@
 | nationality | VARCHAR(100) | YES | 원산지 |
 | type | VARCHAR(100) | YES | 가공방식 |
 | thumbnail_img | VARCHAR(250) | YES | 썸네일 |
-| detail_img | VARCHAR(250) | YES | 상세 이미지 |
 
 **필터링**
 - `continent`: 대륙별 필터 (아프리카, 중남미, 아시아)

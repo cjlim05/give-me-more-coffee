@@ -24,7 +24,6 @@ export default function CoffeeDetail() {
   const [loading, setLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     if (!productId) return;
@@ -172,10 +171,6 @@ export default function CoffeeDetail() {
     );
   }
 
-  const images = product.images && product.images.length > 0
-    ? product.images
-    : [{ imageId: 0, imageUrl: product.thumbnailImg }];
-
   return (
     <View style={styles.container}>
       <Header />
@@ -184,38 +179,11 @@ export default function CoffeeDetail() {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {/* 상품 이미지 */}
-        <View style={styles.imageContainer}>
-          <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={(e) => {
-              const index = Math.round(e.nativeEvent.contentOffset.x / width);
-              setCurrentImageIndex(index);
-            }}
-            scrollEventThrottle={16}
-          >
-            {images.map((img, index) => (
-              <Image
-                key={img.imageId || index}
-                source={{ uri: img.imageUrl }}
-                style={styles.productImage}
-              />
-            ))}
-          </ScrollView>
-
-          {/* 이미지 인디케이터 */}
-          {images.length > 1 && (
-            <View style={styles.indicatorContainer}>
-              <View style={styles.indicatorBadge}>
-                <Text style={styles.indicatorText}>
-                  {currentImageIndex + 1} / {images.length}
-                </Text>
-              </View>
-            </View>
-          )}
-        </View>
+        {/* 썸네일 이미지 */}
+        <Image
+          source={{ uri: product.thumbnailImg }}
+          style={styles.productImage}
+        />
 
         {/* 상품 정보 */}
         <View style={styles.infoContainer}>
@@ -302,17 +270,20 @@ export default function CoffeeDetail() {
           </View>
         </View>
 
-        {/* 상세 이미지 */}
-        {product.detailImg && (
+        {/* 상품 정보 이미지들 */}
+        {product.images && product.images.length > 0 && (
           <>
             <View style={styles.divider} />
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>상품 정보</Text>
-              <Image
-                source={{ uri: product.detailImg }}
-                style={styles.detailImage}
-                resizeMode="contain"
-              />
+              {product.images.map((img, index) => (
+                <Image
+                  key={img.imageId || index}
+                  source={{ uri: img.imageUrl }}
+                  style={styles.detailImage}
+                  resizeMode="contain"
+                />
+              ))}
             </View>
           </>
         )}
@@ -380,30 +351,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // 이미지
-  imageContainer: {
-    position: 'relative',
-  },
+  // 썸네일 이미지
   productImage: {
     width: width,
     height: width,
     backgroundColor: '#f5f5f7',
-  },
-  indicatorContainer: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
-  },
-  indicatorBadge: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  indicatorText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '500',
   },
 
   // 상품 정보
@@ -539,9 +491,11 @@ const styles = StyleSheet.create({
   // 상세 이미지
   detailImage: {
     width: '100%',
-    height: 400,
+    height: undefined,
+    aspectRatio: 1,
     borderRadius: 12,
     backgroundColor: '#f5f5f7',
+    marginBottom: 12,
   },
 
   // 하단 바
