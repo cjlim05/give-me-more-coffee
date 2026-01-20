@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import Header from '../../components/Header';
+import { API_BASE_URL } from '../../config/oauth';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = 140;
@@ -29,12 +30,12 @@ export default function HomeScreen() {
   const [currentBanner, setCurrentBanner] = useState(0);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/products/latest')
+    fetch(`${API_BASE_URL}/api/products/latest`)
       .then(res => res.json())
       .then(data => setLatestProducts(data))
       .catch(err => console.error(err));
 
-    fetch('http://localhost:8080/api/products/best')
+    fetch(`${API_BASE_URL}/api/products/best`)
       .then(res => res.json())
       .then(data => setBestProducts(data))
       .catch(err => console.error(err));

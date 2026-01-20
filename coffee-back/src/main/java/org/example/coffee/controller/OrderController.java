@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import org.example.coffee.dto.OrderRequest;
 import org.example.coffee.dto.OrderResponse;
 import org.example.coffee.service.OrderService;
 
@@ -27,5 +28,11 @@ public class OrderController {
     public OrderResponse getOrderDetail(@PathVariable Long orderId, Authentication authentication) {
         Long userId = (Long) authentication.getPrincipal();
         return orderService.getOrderById(orderId, userId);
+    }
+
+    @PostMapping
+    public OrderResponse createOrder(Authentication authentication, @RequestBody OrderRequest request) {
+        Long userId = (Long) authentication.getPrincipal();
+        return orderService.createOrder(userId, request);
     }
 }

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import Header from '../../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../../config/oauth';
 
 const { width } = Dimensions.get('window');
 
@@ -24,11 +25,14 @@ export default function CoffeeDetail() {
   const [loading, setLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [reviews, setReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState({ averageRating: 0, reviewCount: 0 });
 
   useEffect(() => {
     if (!productId) return;
 
-    fetch(`http://localhost:8080/api/products/${productId}`)
+    // 상품 정보 조회
+    fetch(`${API_BASE_URL}/api/products/${productId}`)
       .then(res => res.json())
       .then(data => {
         setProduct(data);
@@ -41,7 +45,44 @@ export default function CoffeeDetail() {
         console.error(err);
         setLoading(false);
       });
+
+    // 리뷰 조회
+    fetch(`${API_BASE_URL}/api/reviews/product/${productId}`)
+      .then(res => res.json())
+      .then(data => setReviews(data))
+      .catch(err => console.error(err));
+
+    // 리뷰 통계
+    fetch(`${API_BASE_URL}/api/reviews/product/${productId}/stats`)
+      .then(res => res.json())
+      .then(data => setReviewStats(data))
+      .catch(err => console.error(err));
   }, [productId]);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+  };
+
+  const renderStars = (rating) => {
+    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  };
+
+  const handleWriteReview = async () => {
+    const token = await AsyncStorage.getItem('accessToken');
+    if (!token) {
+      Alert.alert('로그인 필요', '리뷰를 작성하려면 로그인이 필요합니다.', [
+        { text: '취소', style: 'cancel' },
+        { text: '로그인', onPress: () => router.push('/login/login') },
+      ]);
+      return;
+    }
+    router.push({
+      pathname: '/review/write',
+      params: { productId: product.productId },
+    });
+  };
 
   const calculateTotalPrice = () => {
     if (!product || !selectedOption) return 0;
@@ -64,7 +105,7 @@ export default function CoffeeDetail() {
       return;
     }
 
-    fetch('http://localhost:8080/api/cart', {
+    fetch(`${API_BASE_URL}/api/cart`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -116,7 +157,7 @@ export default function CoffeeDetail() {
       return;
     }
 
-    fetch('http://localhost:8080/api/cart', {
+    fetch(`${API_BASE_URL}/api/cart`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -287,6 +328,54 @@ export default function CoffeeDetail() {
             </View>
           </>
         )}
+
+        {/* 리뷰 섹션 */}
+        <View style={styles.divider} />
+        <View style={styles.section}>
+          <View style={styles.reviewHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>리뷰</Text>
+              <View style={styles.reviewStats}>
+                <Text style={styles.avgRating}>
+                  ★ {reviewStats.averageRating?.toFixed(1) || '0.0'}
+                </Text>
+                <Text style={styles.reviewCount}>
+                  ({reviewStats.reviewCount || 0}개의 리뷰)
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.writeReviewBtn} onPress={handleWriteReview}>
+              <Text style={styles.writeReviewText}>리뷰 작성</Text>
+            </TouchableOpacity>
+          </View>
+
+          {reviews.length === 0 ? (
+            <View style={styles.noReview}>
+              <Text style={styles.noReviewText}>첫 번째 리뷰를 작성해보세요!</Text>
+            </View>
+          ) : (
+            reviews.slice(0, 3).map((review) => (
+              <View key={review.reviewId} style={styles.reviewItem}>
+                <View style={styles.reviewUserRow}>
+                  <Text style={styles.reviewUserName}>{review.userName}</Text>
+                  <Text style={styles.reviewDate}>{formatDate(review.createdAt)}</Text>
+                </View>
+                <Text style={styles.reviewStars}>{renderStars(review.rating)}</Text>
+                {review.content && (
+                  <Text style={styles.reviewContent} numberOfLines={3}>
+                    {review.content}
+                  </Text>
+                )}
+              </View>
+            ))
+          )}
+
+          {reviews.length > 3 && (
+            <TouchableOpacity style={styles.moreReviewBtn}>
+              <Text style={styles.moreReviewText}>리뷰 더보기 ({reviews.length}개)</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
         {/* 하단 여백 */}
         <View style={{ height: 140 }} />
@@ -496,6 +585,89 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#f5f5f7',
     marginBottom: 12,
+  },
+
+  // 리뷰
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  reviewStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  avgRating: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ff9500',
+    marginRight: 4,
+  },
+  reviewCount: {
+    fontSize: 13,
+    color: '#8e8e93',
+  },
+  writeReviewBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#1c1c1e',
+    borderRadius: 8,
+  },
+  writeReviewText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  noReview: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  noReviewText: {
+    fontSize: 14,
+    color: '#8e8e93',
+  },
+  reviewItem: {
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f5f5f7',
+  },
+  reviewUserRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  reviewUserName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1c1c1e',
+  },
+  reviewDate: {
+    fontSize: 12,
+    color: '#8e8e93',
+  },
+  reviewStars: {
+    fontSize: 14,
+    color: '#ff9500',
+    marginBottom: 8,
+  },
+  reviewContent: {
+    fontSize: 14,
+    color: '#636366',
+    lineHeight: 20,
+  },
+  moreReviewBtn: {
+    paddingVertical: 16,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#f5f5f7',
+  },
+  moreReviewText: {
+    fontSize: 14,
+    color: '#007aff',
+    fontWeight: '500',
   },
 
   // 하단 바

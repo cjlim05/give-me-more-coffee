@@ -13,6 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import Header from '../../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../../config/oauth';
 
 export default function CartScreen() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function CartScreen() {
 
     setIsLoggedIn(true);
 
-    fetch('http://localhost:8080/api/cart', {
+    fetch(`${API_BASE_URL}/api/cart`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -72,7 +73,7 @@ export default function CartScreen() {
 
     const token = await AsyncStorage.getItem('accessToken');
 
-    fetch(`http://localhost:8080/api/cart/${cartItemId}?quantity=${newQuantity}`, {
+    fetch(`${API_BASE_URL}/api/cart/${cartItemId}?quantity=${newQuantity}`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -106,7 +107,7 @@ export default function CartScreen() {
           onPress: async () => {
             const token = await AsyncStorage.getItem('accessToken');
 
-            fetch(`http://localhost:8080/api/cart/${cartItemId}`, {
+            fetch(`${API_BASE_URL}/api/cart/${cartItemId}`, {
               method: 'DELETE',
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -135,7 +136,7 @@ export default function CartScreen() {
       Alert.alert('알림', '장바구니가 비어있습니다.');
       return;
     }
-    Alert.alert('결제', '결제 페이지는 준비 중입니다.');
+    router.push('/order/checkout');
   };
 
   const renderCartItem = ({ item }) => (

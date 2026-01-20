@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import Header from '../../components/Header';
+import { API_BASE_URL } from '../../config/oauth';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 52) / 2;
@@ -29,11 +30,11 @@ export default function CategoryScreen() {
 
     let url = '';
     if (continent) {
-      url = `http://localhost:8080/api/products/filter/continent?value=${encodeURIComponent(continent)}`;
+      url = `${API_BASE_URL}/api/products/filter/continent?value=${encodeURIComponent(continent)}`;
     } else if (nationality) {
-      url = `http://localhost:8080/api/products/filter/nationality?value=${encodeURIComponent(nationality)}`;
+      url = `${API_BASE_URL}/api/products/filter/nationality?value=${encodeURIComponent(nationality)}`;
     } else if (process) {
-      url = `http://localhost:8080/api/products/filter/type?value=${encodeURIComponent(process)}`;
+      url = `${API_BASE_URL}/api/products/filter/type?value=${encodeURIComponent(process)}`;
     }
 
     if (url) {
