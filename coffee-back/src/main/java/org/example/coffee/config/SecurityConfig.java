@@ -35,7 +35,8 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/refresh",
                                 "/api/products/**",
-                                "/api/reviews/product/**"
+                                "/api/reviews/product/**",
+                                "/api/inquiries/product/**"
                         ).permitAll()
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()

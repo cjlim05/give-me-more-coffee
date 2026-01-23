@@ -85,6 +85,13 @@ export default function UserScreen() {
       subtitle: '작성한 리뷰 관리',
       onPress: () => router.push('/user/reviews'),
     },
+    {
+      id: 'inquiries',
+      icon: '💬',
+      title: '내 문의',
+      subtitle: '상품 문의 내역',
+      onPress: () => router.push('/user/inquiries'),
+    },
   ];
 
   // 로그인 안 된 경우

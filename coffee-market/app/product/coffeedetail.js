@@ -27,6 +27,8 @@ export default function CoffeeDetail() {
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState([]);
   const [reviewStats, setReviewStats] = useState({ averageRating: 0, reviewCount: 0 });
+  const [inquiries, setInquiries] = useState([]);
+  const [inquiryCount, setInquiryCount] = useState(0);
 
   useEffect(() => {
     if (!productId) return;
@@ -57,7 +59,27 @@ export default function CoffeeDetail() {
       .then(res => res.json())
       .then(data => setReviewStats(data))
       .catch(err => console.error(err));
+
+    // 상품 문의 조회
+    fetchInquiries();
   }, [productId]);
+
+  const fetchInquiries = async () => {
+    if (!productId) return;
+
+    const token = await AsyncStorage.getItem('accessToken');
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+    fetch(`${API_BASE_URL}/api/inquiries/product/${productId}`, { headers })
+      .then(res => res.json())
+      .then(data => setInquiries(data))
+      .catch(err => console.error(err));
+
+    fetch(`${API_BASE_URL}/api/inquiries/product/${productId}/count`)
+      .then(res => res.json())
+      .then(data => setInquiryCount(data.count || 0))
+      .catch(err => console.error(err));
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -81,6 +103,21 @@ export default function CoffeeDetail() {
     router.push({
       pathname: '/review/write',
       params: { productId: product.productId },
+    });
+  };
+
+  const handleWriteInquiry = async () => {
+    const token = await AsyncStorage.getItem('accessToken');
+    if (!token) {
+      Alert.alert('로그인 필요', '문의를 작성하려면 로그인이 필요합니다.', [
+        { text: '취소', style: 'cancel' },
+        { text: '로그인', onPress: () => router.push('/login/login') },
+      ]);
+      return;
+    }
+    router.push({
+      pathname: '/inquiry/write',
+      params: { productId: product.productId, productName: product.productName },
     });
   };
 
@@ -377,6 +414,65 @@ export default function CoffeeDetail() {
           )}
         </View>
 
+        {/* Q&A 섹션 */}
+        <View style={styles.divider} />
+        <View style={styles.section}>
+          <View style={styles.reviewHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>상품 문의</Text>
+              <Text style={styles.reviewCount}>총 {inquiryCount}개의 문의</Text>
+            </View>
+            <TouchableOpacity style={styles.writeReviewBtn} onPress={handleWriteInquiry}>
+              <Text style={styles.writeReviewText}>문의하기</Text>
+            </TouchableOpacity>
+          </View>
+
+          {inquiries.length === 0 ? (
+            <View style={styles.noReview}>
+              <Text style={styles.noReviewText}>등록된 문의가 없습니다.</Text>
+            </View>
+          ) : (
+            inquiries.slice(0, 5).map((inquiry) => (
+              <View key={inquiry.inquiryId} style={styles.inquiryItem}>
+                <View style={styles.inquiryHeader}>
+                  <View style={styles.inquiryTitleRow}>
+                    {inquiry.isSecret && (
+                      <Text style={styles.secretBadge}>비밀글</Text>
+                    )}
+                    <Text style={styles.inquiryTitle} numberOfLines={1}>
+                      {inquiry.title || '문의'}
+                    </Text>
+                  </View>
+                  <Text style={styles.inquiryDate}>{formatDate(inquiry.createdAt)}</Text>
+                </View>
+                <Text style={styles.inquiryContent} numberOfLines={2}>
+                  {inquiry.content}
+                </Text>
+                <View style={styles.inquiryFooter}>
+                  <Text style={styles.inquiryUser}>{inquiry.userName}</Text>
+                  <View style={[styles.answerBadge, inquiry.isAnswered && styles.answerBadgeActive]}>
+                    <Text style={[styles.answerBadgeText, inquiry.isAnswered && styles.answerBadgeTextActive]}>
+                      {inquiry.isAnswered ? '답변완료' : '답변대기'}
+                    </Text>
+                  </View>
+                </View>
+                {inquiry.isAnswered && inquiry.answer && (
+                  <View style={styles.answerBox}>
+                    <Text style={styles.answerLabel}>답변</Text>
+                    <Text style={styles.answerContent} numberOfLines={3}>{inquiry.answer}</Text>
+                  </View>
+                )}
+              </View>
+            ))
+          )}
+
+          {inquiries.length > 5 && (
+            <TouchableOpacity style={styles.moreReviewBtn}>
+              <Text style={styles.moreReviewText}>문의 더보기 ({inquiryCount}개)</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
         {/* 하단 여백 */}
         <View style={{ height: 140 }} />
       </ScrollView>
@@ -668,6 +764,95 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#007aff',
     fontWeight: '500',
+  },
+
+  // Q&A
+  inquiryItem: {
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f5f5f7',
+  },
+  inquiryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  inquiryTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
+  secretBadge: {
+    fontSize: 11,
+    color: '#8e8e93',
+    backgroundColor: '#f5f5f7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  inquiryTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1c1c1e',
+    flex: 1,
+  },
+  inquiryDate: {
+    fontSize: 12,
+    color: '#8e8e93',
+  },
+  inquiryContent: {
+    fontSize: 14,
+    color: '#636366',
+    lineHeight: 20,
+    marginBottom: 10,
+  },
+  inquiryFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  inquiryUser: {
+    fontSize: 13,
+    color: '#8e8e93',
+  },
+  answerBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    backgroundColor: '#f5f5f7',
+  },
+  answerBadgeActive: {
+    backgroundColor: '#e8f5e9',
+  },
+  answerBadgeText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#8e8e93',
+  },
+  answerBadgeTextActive: {
+    color: '#4caf50',
+  },
+  answerBox: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#1c1c1e',
+  },
+  answerLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1c1c1e',
+    marginBottom: 6,
+  },
+  answerContent: {
+    fontSize: 14,
+    color: '#636366',
+    lineHeight: 20,
   },
 
   // 하단 바
