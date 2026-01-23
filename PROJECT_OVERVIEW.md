@@ -107,17 +107,28 @@ give-me-more-coffee/
 ## API 엔드포인트
 
 ### 현재 구현됨
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| GET | `/api/products/latest` | 최신 상품 10개 |
-| GET | `/api/products/best` | 베스트 상품 (카테고리 1) |
-| GET | `/api/products/{productId}` | 상품 상세 정보 |
-
-### 구현 예정
-- 사용자 인증 (로그인, 회원가입, 소셜 로그인)
-- 장바구니 기능
-- 주문/결제 기능
-- 사용자 프로필 관리
+| Method | Endpoint | 설명 | 인증 |
+|--------|----------|------|------|
+| GET | `/api/products/latest` | 최신 상품 10개 | X |
+| GET | `/api/products/best` | 베스트 상품 | X |
+| GET | `/api/products/{productId}` | 상품 상세 정보 | X |
+| POST | `/api/auth/login` | 소셜 로그인 | X |
+| GET | `/api/cart` | 장바구니 조회 | O |
+| POST | `/api/cart` | 장바구니 추가 | O |
+| PATCH | `/api/cart/{id}` | 수량 변경 | O |
+| DELETE | `/api/cart/{id}` | 장바구니 삭제 | O |
+| POST | `/api/orders` | 주문 생성 | O |
+| GET | `/api/orders/my` | 내 주문 목록 | O |
+| GET | `/api/addresses` | 배송지 조회 | O |
+| POST | `/api/addresses` | 배송지 추가 | O |
+| GET | `/api/reviews/product/{id}` | 상품 리뷰 목록 | X |
+| POST | `/api/reviews` | 리뷰 작성 | O |
+| GET | `/api/reviews/my` | 내 리뷰 목록 | O |
+| GET | `/api/inquiries/product/{id}` | 상품 문의 목록 | X |
+| POST | `/api/inquiries` | 문의 작성 | O |
+| GET | `/api/inquiries/my` | 내 문의 목록 | O |
+| PUT | `/api/inquiries/{id}` | 문의 수정 | O |
+| DELETE | `/api/inquiries/{id}` | 문의 삭제 | O |
 
 ## 프론트엔드 라우트
 
@@ -129,7 +140,17 @@ give-me-more-coffee/
 | `/login/signup` | 회원가입 | UI 구현됨 |
 | `/login/findid` | ID 찾기 | UI 구현됨 |
 | `/login/findpassword` | 비밀번호 찾기 | UI 구현됨 |
-| `/user` | 사용자 프로필 | 라우트만 존재 |
+| `/user` | 마이페이지 | 구현됨 |
+| `/user/orders` | 주문 내역 | 구현됨 |
+| `/user/addresses` | 배송지 관리 | 구현됨 |
+| `/user/points` | 포인트 내역 | 구현됨 |
+| `/user/reviews` | 내 리뷰 | 구현됨 |
+| `/user/inquiries` | 내 문의 | 구현됨 |
+| `/cart` | 장바구니 | 구현됨 |
+| `/order/checkout` | 주문/결제 | 구현됨 |
+| `/review/write` | 리뷰 작성 | 구현됨 |
+| `/inquiry/write` | 문의 작성 | 구현됨 |
+| `/category` | 카테고리 필터 | 구현됨 |
 
 ## 개발 명령어
 
@@ -163,9 +184,14 @@ npm run web               # 웹 브라우저 실행
 
 ## TODO
 
-- [ ] 프론트엔드 API URL 설정
-- [ ] 사용자 인증 구현 (백엔드 + 프론트엔드)
-- [ ] 소셜 로그인 연동 (네이버, 카카오, 구글)
-- [ ] 장바구니 기능
-- [ ] 주문/결제 기능
-- [ ] 상품 필터링 (원산지, 가공방식)
+- [x] 사용자 인증 구현 (백엔드 + 프론트엔드)
+- [x] 소셜 로그인 연동 (네이버, 카카오, 구글)
+- [x] 장바구니 기능
+- [x] 주문/결제 기능
+- [x] 상품 필터링 (원산지, 가공방식)
+- [x] 마이페이지 (주문내역, 배송지, 포인트)
+- [x] 리뷰 기능
+- [x] 상품 문의(Q&A) 기능
+- [ ] 상품 검색 기능
+- [ ] 실제 PG 결제 연동
+- [ ] 푸시 알림

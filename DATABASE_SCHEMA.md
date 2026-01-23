@@ -31,6 +31,7 @@
     cart_item    →  user_id + product_id + option_id
     order_item   →  order_id(→user) + product_id + option_id
     review       →  user_id + product_id
+    product_inquiry → user_id + product_id (상품 문의)
 ```
 
 ---
@@ -51,6 +52,7 @@
 | | order_item | 주문상품 (order ↔ product) |
 | | review | 리뷰 (user ↔ product) |
 | | review_image | 리뷰사진 |
+| | product_inquiry | 상품 문의 (user ↔ product) |
 
 ---
 
@@ -62,6 +64,7 @@
 | user | cart_item | 1:N | 장바구니 |
 | user | orders | 1:N | 주문 내역 |
 | user | review | 1:N | 작성한 리뷰 |
+| user | product_inquiry | 1:N | 작성한 문의 |
 | user | point_history | 1:N | 포인트 내역 |
 | orders | order_item | 1:N | 주문 상품들 |
 | review | review_image | 1:N | 리뷰 사진들 |
@@ -69,6 +72,7 @@
 | product | product_image | 1:N | 상품 사진들 |
 | product | product_variant | 1:N | 재고 |
 | product | review | 1:N | 상품 리뷰 |
+| product | product_inquiry | 1:N | 상품 문의 |
 
 ---
 
@@ -183,7 +187,24 @@
 
 ---
 
-### 8. point_history (포인트 내역)
+### 8. product_inquiry (상품 문의)
+| 컬럼 | 타입 | NULL | 설명 |
+|------|------|------|------|
+| inquiry_id | BIGINT | PK | 문의 ID |
+| product_id | BIGINT | FK | 상품 ID |
+| user_id | BIGINT | FK | 작성자 ID |
+| title | VARCHAR(200) | YES | 문의 제목 |
+| content | TEXT | NO | 문의 내용 |
+| answer | TEXT | YES | 답변 (NULL이면 미답변) |
+| answered_at | DATETIME | YES | 답변 시간 |
+| is_secret | BOOLEAN | DEFAULT FALSE | 비밀글 여부 |
+| created_at | DATETIME | DEFAULT NOW | 작성일 |
+
+> **답변 처리**: 어드민에서 `answer`, `answered_at` 컬럼 UPDATE
+
+---
+
+### 9. point_history (포인트 내역)
 | 컬럼 | 타입 | NULL | 설명 |
 |------|------|------|------|
 | history_id | BIGINT | PK | 내역 ID |
@@ -252,5 +273,6 @@
 | cart_item | user_id, product_id, option_id |
 | order_item | order_id, product_id, option_id |
 | review | user_id, product_id, order_item_id |
+| product_inquiry | user_id, product_id |
 | point_history | user_id, order_id |
 | product_variant | product_id, option_id |
